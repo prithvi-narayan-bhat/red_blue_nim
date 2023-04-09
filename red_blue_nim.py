@@ -1,38 +1,36 @@
-import random
-from argparse import ArgumentParser as parser
-from auxillary import *
-from moves import *
+from argparse   import ArgumentParser as parser
+from moves      import *
 
 
 def gameEngine(redMarbleCount, blueMarbleCount, playerOne, searchDepth):
-    current_player = playerOne
-    board = [redMarbleCount, blueMarbleCount]
+    turn = playerOne                                            # Set playerOne as input by user to start
+    board = [redMarbleCount, blueMarbleCount]                   # Set up the gameBoard
 
-    while True:
+    print(f"\n\nStarting board: {board}\n\n")                   # Display board
 
-        while board[0] > 0 and board[1] > 0:
-            print(f"\n\nCurrent board: {board}\n")
+    while True:                                                 # Until there is a winner
+        while board[0] > 0 and board[1] > 0:                    # Game ends when there are no more marbles on the board
 
-            if current_player == 'computer':
-                board, removed_color, removed_count = getComputerMove(board, searchDepth)
-                print(f"Computer removes {removed_count} {removed_color} marble(s)")
+            if board[0] == 0 or board[1] == 0:                  # Game ends
+                break
 
-                if board[0] == 0 or board[1] == 0:
-                    break
+            if turn == 'computer':                              # Get the computer's move
+                board = getComputerMove(board, searchDepth)
+            else:                                               # Get the human's move
+                board = getHumanMove(board)
 
-            else:
-                board, marble, count = getHumanMove(board)
-                print(f"You removed {count} {marble} marble(s)")
+            print(f"\n\nCurrent board: {board}\n\n")            # Display the board after each turn
+            turn = 'computer' if turn == 'human' else 'human'   # Update the player after each turn
 
-            current_player = 'computer' if current_player == 'human' else 'human'
+        winner, score = evaluateBoardStatus(board, GET_SCORE)   # Get the score at the end of the game
 
-        winner, score = evaluateBoardStatus(board, 'score')
-        print(f"{winner} wins!\nScore: {score}")
+        print(f"{winner} wins!\nScore: {score}")                # Print winner and the score
 
         break
 
 if __name__ == '__main__':
 
+    # Parse command line inputs from user
     cli = parser()
     cli.add_argument('red', help='Number of Red marbles')
     cli.add_argument('blue', help='Number of Blue marbles')
@@ -40,9 +38,10 @@ if __name__ == '__main__':
     cli.add_argument('searchDepth', help='Depth of the MinMax search')
     cli_args = cli.parse_args()
 
-    redMarbleCount       = int(cli_args.red)
-    blueMarbleCount       = int(cli_args.blue)
-    playerOne    = cli_args.playerOne
-    searchDepth    = int(cli_args.searchDepth)
+    redMarbleCount      = int(cli_args.red)
+    blueMarbleCount     = int(cli_args.blue)
+    playerOne           = cli_args.playerOne
+    searchDepth         = int(cli_args.searchDepth)
 
+    # Call function to start playing game
     gameEngine(redMarbleCount, blueMarbleCount, playerOne, searchDepth)

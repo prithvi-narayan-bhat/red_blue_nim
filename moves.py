@@ -1,71 +1,50 @@
-from auxillary import *
+from gameEngine import *
+import random
+
+REMOVE_MARBLE = 1
+
 
 def getComputerMove(gameBoard, searchDepth):
     """
         Function to determine the computer's next move using minimax and alpha-beta pruning
     """
-    bestRemoveValue = float('-inf')                                                     # Set an absurdly large value at first
-    bestMoveList = []                                                                   # Initialise an empty list
-    removeCount = 0                                                                     # Initialise value
-    removeColor = ''                                                                    # Initialise empty string
+    coloursToRemove = int(MINUS_INFINITY)                                   # Set an absurdly large value at first. Implying, not moving at all
+    bestMoveList = []                                                       # Initialise an empty list of best moves
+    removedColour = ''                                                      # Initialise empty string of removed marble
 
-    for i in range(2):
+    for i in range(MAX_MARBLES):
 
-        if gameBoard[i] > 0:
-            updatedBoard = list(gameBoard)
-            updatedBoard[i] -= 1
+        updatedBoard = list(gameBoard)                                      # Take a local copy of the gameBoard to determine the best move
 
-            value = minimax_ab(
-                updatedBoard,
-                searchDepth-1,
-                float('-inf'),
-                float('inf'),
-                False
-            )
+        while updatedBoard[i] > 0:                                          # While the game still has possible moves to make
 
-            if value > bestRemoveValue:
-                bestRemoveValue = value
-                bestMoveList = [i]
-                removeColor = 'red' if i == 0 else 'blue'
-                removeCount = gameBoard[i] - updatedBoard[i]
+            updatedBoard[i] -= REMOVE_MARBLE                                # Indicate that one move has be made, to update the loop exit condition
 
-            elif value == bestRemoveValue:
-                bestMoveList.append(i)
+            # Call the minimax function repeatedly for each colour to determine the feasibility of the move
+            value = evaluateMoves(updatedBoard, searchDepth-1, float('-inf'), float('inf'), False)
 
-    optimalMove = random.choice(bestMoveList)
-    gameBoard[optimalMove] -= 1
+            if value >= coloursToRemove:                                    # Implies it is a better move than not moving at all
+                coloursToRemove = value
+                bestMoveList.append(i)                                      # Append the move to a list of possible moves
 
-    return gameBoard, removeColor, removeCount
+
+    optimalMove = random.choice(bestMoveList)                               # Pick a random move from the most optimal moves
+    removedColour = 'red' if optimalMove == 0 else 'blue'                   # Return the removed colour to be printed
+
+    gameBoard[optimalMove] -= REMOVE_MARBLE                                 # Indicate that the game has one lesser move
+
+    print(f"Computer removes a {removedColour} marble")
+
+    return gameBoard
 
 
 def getHumanMove(gameBoard):
     """
         Function to read human player's move and validate it
     """
+    removedColour = input("Choose a marble to remove from (red/blue): ")    # Prompt player for an input
+    marbleColour = 0 if removedColour.lower() == 'red' else 1               # Parse input
 
-    marble = input("Choose a marble to remove from (red/blue): ")                       # Prompt player for an input
+    gameBoard[marbleColour] -= REMOVE_MARBLE                                # Remove the user input number of marbles of user input colour
 
-    marbleColour = 0 if marble.lower() == 'red' else 1                                  # Parse input
-
-    while True:
-        removeCount = input("Choose how many marbles to remove (1 or 2): ")             # Prompt player for an input
-        try:
-            removeCount = int(removeCount)                                              # Parse input
-
-            if removeCount < 1 or removeCount > 2:                                      # Validate input
-                print("ERROR! Invalid value\n\n\n")
-                continue
-
-            if gameBoard[marbleColour] < removeCount:                                   # Validate input
-                print(f"ERROR! Invalid value")
-                print("Enter a number smaller than {gameBoard[marbleColour]}: ")        # Prompt user for an input
-                continue
-            break
-
-        except ValueError:
-            print("ERROR! Invalid value\n\n\n")                                         # Throw exception
-            continue
-
-    gameBoard[marbleColour] -= removeCount                                              # Remove the user input number of marbles of user input colour
-
-    return gameBoard, marble, removeCount                                               # Return updated values
+    return gameBoard                                                        # Return updated values
