@@ -8,7 +8,7 @@ def getComputerMove(gameBoard, searchDepth):
     """
         Function to determine the computer's next move using minimax and alpha-beta pruning
     """
-    coloursToRemove = int(MINUS_INFINITY)                                   # Set an absurdly large value at first. Implying, not moving at all
+    coloursToRemove = int(MINUS_INFINITY)                                   # Set an absurdly large abPruneValue at first. Implying, not moving at all
     bestMoveList = []                                                       # Initialise an empty list of best moves
     removedColour = ''                                                      # Initialise empty string of removed marble
 
@@ -21,10 +21,10 @@ def getComputerMove(gameBoard, searchDepth):
             updatedBoard[i] -= REMOVE_MARBLE                                # Indicate that one move has be made, to update the loop exit condition
 
             # Call the minimax function repeatedly for each colour to determine the feasibility of the move
-            value = evaluateMoves(updatedBoard, searchDepth-1, float('-inf'), float('inf'), False)
+            abPruneValue = evaluateMoves(updatedBoard, searchDepth-1, float('-inf'), float('inf'), False)
 
-            if value >= coloursToRemove:                                    # Implies it is a better move than not moving at all
-                coloursToRemove = value
+            if abPruneValue >= coloursToRemove:                             # Implies it is a better move than not moving at all
+                coloursToRemove = abPruneValue
                 bestMoveList.append(i)                                      # Append the move to a list of possible moves
 
 
